@@ -5,10 +5,151 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model TimeSlot {
+  id       String   @id @default(uuid())
+  date     DateTime
+  time     String // "10:00", "14:30"
+  capacity Int
+  isActive Boolean  @default(true)
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, time], name: "date_time")
+  @@index([date])
+}
+
+model Booking {
+  id String @id @default(uuid())
+
+  // Slot
+  timeSlotId String
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id])
+
+  // Service
+  serviceType String // Exterior | Interior | Full Valet
+
+  // Customer
+  name  String
+  email String
+  phone String
+
+  // Vehicle
+  vehicleMake  String
+  vehicleModel String
+  registration String
+  vehicleSize  String // Small | Medium | Large | Van
+
+  // Address
+  address  String
+  postcode String
+  notes    String?
+
+  status BookingStatus  @default(PENDING_PAYMENT)
+  price  Int
+
+  payment Payment?
+
+  createdAt DateTime @default(now())
+}
+
+model ServicePrice {
+  id          String @id @default(uuid())
+
+  vehicleSize VehicleSize
+  serviceType ServiceType
+
+  price       Int    // store in smallest unit (e.g. paise / pence)
+
+  isActive    Boolean @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([vehicleSize, serviceType])
+}
+
+model ServiceArea {
+  id        String @id @default(uuid())
+
+  postcode  String
+  weekday   Int     // 0 = Sunday ... 6 = Saturday
+
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([postcode])
+  @@unique([postcode, weekday])
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  amount    Int
+  currency  String @default("GBP")
+
+  provider  String // STRIPE
+  intentId  String @unique
+
+  status    PaymentStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  PENDING_PAYMENT
+}
+
+enum VehicleSize {
+  SMALL
+  MEDIUM
+  LARGE
+  VAN
+}
+
+enum ServiceType {
+  EXTERIOR
+  INTERIOR
+  VALET
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+
