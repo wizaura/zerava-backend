@@ -6,10 +6,10 @@ export class BookingService {
     constructor(private readonly repo: BookingRepository) { }
 
     createBooking(payload: any) {
-        const { timeSlotId, ...bookingData } = payload;
+        const { serviceSlotId, ...bookingData } = payload;
 
         return this.repo.createWithSlotLock({
-            timeSlotId,
+            serviceSlotId,
             bookingData,
         });
     }

@@ -1,56 +1,58 @@
 import {
     Controller,
     Get,
-    Param,
     Post,
-    Body,
     Delete,
+    Param,
+    Body,
     UseGuards,
 } from '@nestjs/common';
-import { ServiceAreaService } from './service-area.service';
+import { ServiceZonesService } from './service-zones.service';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
 
 @Controller()
-export class ServiceAreaController {
-    constructor(private readonly service: ServiceAreaService) { }
+export class ServiceZonesController {
+    constructor(private readonly service: ServiceZonesService) { }
 
     /* ---------------- PUBLIC ---------------- */
 
-    @Get('service-areas/:postcode')
+    @Get('service-zones/check/:postcode')
     checkPostcode(@Param('postcode') postcode: string) {
-        return this.service.checkAvailability(postcode.toUpperCase());
+        return this.service.checkPostcode(postcode.toUpperCase());
     }
 
     /* ---------------- ADMIN ---------------- */
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
-    @Get('admin/service-areas')
+    @Get('admin/service-zones')
     getAll() {
         return this.service.getAll();
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
-    @Post('admin/service-areas')
+    @Post('admin/service-zones')
     create(
         @Body()
         body: {
-            postcode: string;
-            weekday: number;
+            postcodePrefix: string;
+            serviceDay: number;
+            zoneCode: string;
         },
     ) {
         return this.service.create(
-            body.postcode.toUpperCase(),
-            body.weekday,
+            body.postcodePrefix.toUpperCase(),
+            body.serviceDay,
+            body.zoneCode.toUpperCase(),
         );
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
-    @Delete('admin/service-areas/:id')
+    @Delete('admin/service-zones/:id')
     delete(@Param('id') id: string) {
         return this.service.delete(id);
     }

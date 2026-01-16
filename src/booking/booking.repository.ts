@@ -6,24 +6,32 @@ export class BookingRepository {
     constructor(private readonly prisma: PrismaService) { }
 
     async createWithSlotLock(data: {
-        timeSlotId: string;
+        serviceSlotId: string;
         bookingData: any;
     }) {
         return this.prisma.$transaction(async (tx) => {
-            const slot = await tx.timeSlot.findUnique({
-                where: { id: data.timeSlotId },
-                include: { bookings: true },
+            const slot = await tx.serviceSlot.findUnique({
+                where: { id: data.serviceSlotId },
+                include: {
+                    bookings: true,
+                },
             });
 
-            if (!slot) throw new BadRequestException('Slot not found');
-            if (!slot.isActive)
-                throw new BadRequestException('Slot blocked');
-            if (slot.bookings.length >= slot.capacity)
+            if (!slot) {
+                throw new BadRequestException('Slot not found');
+            }
+
+            if (slot.status !== 'ACTIVE') {
+                throw new BadRequestException('Slot inactive');
+            }
+
+            if (slot.bookings.length >= slot.maxBookings) {
                 throw new BadRequestException('Slot fully booked');
+            }
 
             return tx.booking.create({
                 data: {
-                    timeSlotId: data.timeSlotId,
+                    serviceSlotId: slot.id,
                     ...data.bookingData,
                     status: 'PENDING_PAYMENT',
                 },
