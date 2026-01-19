@@ -18,8 +18,8 @@ export class AdminAuthController {
     async verifyOtp(@Body() dto: AdminVerifyOtpDto, @Res({ passthrough: true }) res: Response) {
         const result = await this.auth.verifyOtp(dto.email, dto.otp);
 
-        res.cookie("adminRefreshToken", result.refreshToken, { httpOnly: true, sameSite: "lax", secure: false, maxAge:  60 * 1000 });
-        res.cookie("adminAccessToken", result.accessToken, { httpOnly: true, sameSite: "lax", secure: false, maxAge: 15 * 60 * 1000 });
+        res.cookie("adminRefreshToken", result.refreshToken, { httpOnly: true, sameSite: "none", secure: true, maxAge:  60 * 1000 });
+        res.cookie("adminAccessToken", result.accessToken, { httpOnly: true, sameSite: "none", secure: true, maxAge: 15 * 60 * 1000 });
 
         return { admin: result.admin, token: result.accessToken };
     }
@@ -31,8 +31,8 @@ export class AdminAuthController {
 
         res.cookie("adminAccessToken", result.accessToken, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            sameSite: "none",
+            secure: true,
         });
 
         return result;
