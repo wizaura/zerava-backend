@@ -13,6 +13,7 @@ import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
 import { UpsertPriceDto } from './dto/upsert-price.dto';
 import { ServiceType, VehicleSize } from '@prisma/client';
+import { AdminJwtAuthGuard } from 'src/auth/admin-auth/jwt/jwt.guard';
 
 @Controller()
 export class ServicePricingController {
@@ -20,14 +21,14 @@ export class ServicePricingController {
 
     /* ---------------- ADMIN ---------------- */
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Post('admin/service-prices')
     upsertPrice(@Body() dto: UpsertPriceDto) {
         return this.service.upsertPrice(dto);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Patch('admin/service-prices/deactivate')
     deactivate(

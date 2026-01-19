@@ -11,6 +11,7 @@ import { ServiceZonesService } from './service-zones.service';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
+import { AdminJwtAuthGuard } from 'src/auth/admin-auth/jwt/jwt.guard';
 
 @Controller()
 export class ServiceZonesController {
@@ -25,14 +26,14 @@ export class ServiceZonesController {
 
     /* ---------------- ADMIN ---------------- */
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Get('admin/service-zones')
     getAll() {
         return this.service.getAll();
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Post('admin/service-zones')
     create(
@@ -50,7 +51,7 @@ export class ServiceZonesController {
         );
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Delete('admin/service-zones/:id')
     delete(@Param('id') id: string) {

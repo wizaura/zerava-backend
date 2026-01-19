@@ -7,6 +7,7 @@ export class BookingController {
 
     @Post()
     create(@Body() body: any) {
+        console.log(body, 'Body')
         return this.service.createBooking(body);
     }
 }

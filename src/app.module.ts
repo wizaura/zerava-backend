@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { UserModule } from './user/user.module';
 import { BookingModule } from './booking/booking.module';
 import { ServicesModule } from './services/services.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -17,6 +17,7 @@ import { ServiceZonesModule } from './service-zones/service-zones.module';
 import { ServiceSlotsModule } from './service-slots/service-slots.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { OperatorModule } from './operator/operator.module';
+import { AdminAuthModule } from './auth/admin-auth/admin-auth.module';
 
 @Module({
   imports: [
@@ -24,11 +25,12 @@ import { OperatorModule } from './operator/operator.module';
     PrismaModule,
 
     AuthModule,
-    UsersModule,
+    UserModule,
     BookingModule,
     ServicesModule,
     SubscriptionsModule,
     AdminModule,
+    AdminAuthModule,
     PaymentsModule,
     MailModule,
 

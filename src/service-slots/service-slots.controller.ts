@@ -8,9 +8,9 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ServiceSlotsService } from './service-slots.service';
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
+import { AdminJwtAuthGuard } from 'src/auth/admin-auth/jwt/jwt.guard';
 
 @Controller()
 export class ServiceSlotsController {
@@ -18,14 +18,14 @@ export class ServiceSlotsController {
 
     /* ---------------- ADMIN ---------------- */
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Get('admin/service-slots')
     getAll() {
         return this.service.getAll();
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Post('admin/service-slots')
     create(
@@ -49,7 +49,7 @@ export class ServiceSlotsController {
         });
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Delete('admin/service-slots/:id')
     delete(@Param('id') id: string) {

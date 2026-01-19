@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { BookingRepository } from './booking.repository';
+import { CreateBookingDto } from './booking.dto';
 
 @Injectable()
 export class BookingService {
     constructor(private readonly repo: BookingRepository) { }
 
-    createBooking(payload: any) {
-        const { serviceSlotId, ...bookingData } = payload;
-
-        return this.repo.createWithSlotLock({
-            serviceSlotId,
-            bookingData,
-        });
+    createBooking(dto: CreateBookingDto) {
+        return this.repo.createWithSlotLock(dto);
     }
 }
+

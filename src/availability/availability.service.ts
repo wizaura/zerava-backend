@@ -54,7 +54,7 @@ export class AvailabilityService {
 
         const slots = await this.slotsService.findAvailable(date, prefix);
 
-        console.log(slots,'jj');
+        console.log(slots, 'jj');
 
         if (!slots.length) {
             return {
@@ -71,23 +71,28 @@ export class AvailabilityService {
         const BLOCK_MINUTES = 120; // 2 hours
 
         const availableBlocks = slots.flatMap((slot) => {
-            const remaining = slot.maxBookings - slot._count.bookings;
-            if (remaining <= 0) return [];
+            const blocks = generateTimeBlocks(slot.timeFrom, slot.timeTo, BLOCK_MINUTES);
 
-            return generateTimeBlocks(slot.timeFrom, slot.timeTo, BLOCK_MINUTES).map(
-                (block) => ({
+            return blocks
+                .filter((block) => {
+                    // if this exact block is already booked → hide it
+                    return !slot.bookings.some(
+                        (b) =>
+                            b.timeFrom === block.from &&
+                            b.timeTo === block.to
+                    );
+                })
+                .map((block) => ({
                     id: `${slot.id}_${block.from}`,
                     serviceSlotId: slot.id,
                     operator: slot.operator.name,
                     timeFrom: block.from,
                     timeTo: block.to,
-                    available: remaining,
-                    max: slot.maxBookings,
-                })
-            );
+                }));
         });
 
-        console.log(availableBlocks,'jh')
+
+        console.log(availableBlocks, 'jh')
 
         if (!availableBlocks.length) {
             return {

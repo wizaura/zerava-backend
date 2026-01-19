@@ -62,6 +62,12 @@ export class ServiceSlotsRepository {
             },
             include: {
                 operator: true,
+                bookings: {
+                    select: {
+                        timeFrom: true,
+                        timeTo: true,
+                    }
+                },
                 _count: {
                     select: { bookings: true },
                 },

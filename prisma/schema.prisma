@@ -19,6 +19,25 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+
+  fullName        String?
+  phone           String?
+  address         String?
+  postcode        String?
+  vehicleSize     String?   // small / medium / large
+
+  createdAt       DateTime @default(now())
+}
+
+
+enum UserRole {
+  user
+  admin
+}
+
 model Otp {
   id        String   @id @default(uuid())
   email     String
@@ -32,31 +51,33 @@ model Otp {
 
 model Booking {
   id String @id @default(uuid())
+  referenceCode String? @unique
 
   serviceSlotId String
   serviceSlot   ServiceSlot @relation(fields: [serviceSlotId], references: [id])
 
+  timeFrom String   // "10:00"
+  timeTo   String   // "12:00"
+
   serviceType ServiceType
+  vehicleSize VehicleSize
+  price       Int
 
   name  String
   email String
   phone String
-
-  vehicleMake  String
-  vehicleModel String
-  registration String
-  vehicleSize  VehicleSize
 
   address  String
   postcode String
   notes    String?
 
   status BookingStatus @default(PENDING_PAYMENT)
-  price  Int
-
   payment Payment?
 
   createdAt DateTime @default(now())
+
+  @@unique([serviceSlotId, timeFrom, timeTo])
+  @@index([serviceSlotId])
 }
 
 model ServiceZone {
