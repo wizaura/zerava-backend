@@ -6,7 +6,6 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { OperatorService } from './operator.service';
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
 import { AdminJwtAuthGuard } from 'src/auth/admin-auth/jwt/jwt.guard';

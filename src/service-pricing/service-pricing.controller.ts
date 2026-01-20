@@ -8,7 +8,6 @@ import {
     Query,
 } from '@nestjs/common';
 import { ServicePricingService } from './service-pricing.service';
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
 import { UpsertPriceDto } from './dto/upsert-price.dto';
