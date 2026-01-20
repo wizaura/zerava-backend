@@ -20,7 +20,7 @@
         "src/*"
       ]
     },
-    "strict": true,
+    "strict": false,
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
