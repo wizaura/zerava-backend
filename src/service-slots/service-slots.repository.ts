@@ -10,6 +10,11 @@ export class ServiceSlotsRepository {
     findAll() {
         return this.prisma.serviceSlot.findMany({
             orderBy: [{ date: 'asc' }],
+            where: {
+                operator: {
+                    isActive: true,
+                },
+            },
             include: {
                 operator: true,
                 _count: {

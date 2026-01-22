@@ -1,70 +1,72 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import "dotenv/config";
+import {
+    PrismaClient,
+    VehicleSize,
+    ServiceType,
+    BookingStatus,
+} from "@prisma/client";
 
-const prisma = new PrismaClient({ log: ['error'] });
+const prisma = new PrismaClient({ log: ["error"] });
 
 async function main() {
-    console.log('🌱 Seeding database...');
+    console.log("🌱 Seeding database...");
 
-    /* ---------------- ADMIN ---------------- */
+    /* ================= ADMIN ================= */
 
-    const adminEmail = 'admin@zerava.co';
+    const adminEmail = "admin@zerava.co";
 
     await prisma.admin.upsert({
         where: { email: adminEmail },
         update: {},
-        create: {
-            email: adminEmail,
-        },
+        create: { email: adminEmail },
     });
 
-    console.log('✅ Admin created');
+    console.log("✅ Admin seeded");
 
-    /* ---------------- OPERATORS ---------------- */
+    /* ================= OPERATORS ================= */
 
     const operators = await Promise.all([
         prisma.operator.upsert({
-            where: { name: 'Melbin Mathew' },
-            update: {},
-            create: { name: 'Melbin Mathew' },
+            where: { name: "Melbin Mathew" },
+            update: { isActive: true },
+            create: { name: "Melbin Mathew", isActive: true },
         }),
         prisma.operator.upsert({
-            where: { name: 'Razik M' },
-            update: {},
-            create: { name: 'Razik M' },
+            where: { name: "Razik M" },
+            update: { isActive: true },
+            create: { name: "Razik M", isActive: true },
         }),
     ]);
 
-    console.log('✅ Operators created');
+    console.log("✅ Operators seeded");
 
-    /* ---------------- SERVICE ZONES ---------------- */
+    /* ================= SERVICE ZONES ================= */
 
     const zones = [
         // Monday
-        { postcodePrefix: 'SO18', serviceDay: 1, zoneCode: 'A' },
-        { postcodePrefix: 'SO19', serviceDay: 1, zoneCode: 'A' },
+        { postcodePrefix: "SO18", serviceDay: 1, zoneCode: "A" },
+        { postcodePrefix: "SO19", serviceDay: 1, zoneCode: "A" },
 
         // Tuesday
-        { postcodePrefix: 'SO14', serviceDay: 2, zoneCode: 'B' },
-        { postcodePrefix: 'SO15', serviceDay: 2, zoneCode: 'B' },
+        { postcodePrefix: "SO14", serviceDay: 2, zoneCode: "B" },
+        { postcodePrefix: "SO15", serviceDay: 2, zoneCode: "B" },
 
         // Wednesday
-        { postcodePrefix: 'SO16', serviceDay: 3, zoneCode: 'C' },
-        { postcodePrefix: 'SO17', serviceDay: 3, zoneCode: 'C' },
+        { postcodePrefix: "SO16", serviceDay: 3, zoneCode: "C" },
+        { postcodePrefix: "SO17", serviceDay: 3, zoneCode: "C" },
 
         // Thursday
-        { postcodePrefix: 'SO30', serviceDay: 4, zoneCode: 'D' },
-        { postcodePrefix: 'SO31', serviceDay: 4, zoneCode: 'D' },
+        { postcodePrefix: "SO30", serviceDay: 4, zoneCode: "D" },
+        { postcodePrefix: "SO31", serviceDay: 4, zoneCode: "D" },
 
         // Friday
-        { postcodePrefix: 'SO32', serviceDay: 5, zoneCode: 'E' },
-        { postcodePrefix: 'SO50', serviceDay: 5, zoneCode: 'E' },
+        { postcodePrefix: "SO32", serviceDay: 5, zoneCode: "E" },
+        { postcodePrefix: "SO50", serviceDay: 5, zoneCode: "E" },
 
         // Saturday
-        { postcodePrefix: 'SO51', serviceDay: 6, zoneCode: 'F' },
-        { postcodePrefix: 'SO52', serviceDay: 6, zoneCode: 'F' },
-        { postcodePrefix: 'SO53', serviceDay: 6, zoneCode: 'F' },
+        { postcodePrefix: "SO51", serviceDay: 6, zoneCode: "F" },
+        { postcodePrefix: "SO52", serviceDay: 6, zoneCode: "F" },
+        { postcodePrefix: "SO53", serviceDay: 6, zoneCode: "F" },
     ];
 
     for (const zone of zones) {
@@ -80,9 +82,51 @@ async function main() {
         });
     }
 
-    console.log('✅ Service zones seeded');
+    console.log("✅ Service zones seeded");
 
-    /* ---------------- SERVICE SLOTS ---------------- */
+    /* ================= SERVICE PRICES ================= */
+
+    const prices = [
+        // SMALL
+        { vehicleSize: VehicleSize.SMALL, serviceType: ServiceType.VALET, price: 7500 },
+        { vehicleSize: VehicleSize.SMALL, serviceType: ServiceType.INTERIOR, price: 6000 },
+        { vehicleSize: VehicleSize.SMALL, serviceType: ServiceType.EXTERIOR, price: 5000 },
+
+        // MEDIUM
+        { vehicleSize: VehicleSize.MEDIUM, serviceType: ServiceType.VALET, price: 9000 },
+        { vehicleSize: VehicleSize.MEDIUM, serviceType: ServiceType.INTERIOR, price: 7500 },
+        { vehicleSize: VehicleSize.MEDIUM, serviceType: ServiceType.EXTERIOR, price: 6500 },
+
+        // LARGE
+        { vehicleSize: VehicleSize.LARGE, serviceType: ServiceType.VALET, price: 11000 },
+        { vehicleSize: VehicleSize.LARGE, serviceType: ServiceType.INTERIOR, price: 9500 },
+        { vehicleSize: VehicleSize.LARGE, serviceType: ServiceType.EXTERIOR, price: 8000 },
+    ];
+
+    for (const item of prices) {
+        await prisma.servicePrice.upsert({
+            where: {
+                vehicleSize_serviceType: {
+                    vehicleSize: item.vehicleSize,
+                    serviceType: item.serviceType,
+                },
+            },
+            update: {
+                price: item.price,
+                isActive: true,
+            },
+            create: {
+                vehicleSize: item.vehicleSize,
+                serviceType: item.serviceType,
+                price: item.price,
+                isActive: true,
+            },
+        });
+    }
+
+    console.log("✅ Service prices seeded");
+
+    /* ================= SERVICE SLOTS ================= */
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -96,19 +140,19 @@ async function main() {
                 data: {
                     operatorId: operator.id,
                     date,
-                    timeFrom: '09:00',
-                    timeTo: '17:00',
+                    timeFrom: "09:00",
+                    timeTo: "17:00",
                     maxBookings: 4,
-                    zonePrefix: 'SO16', // optional, remove to make global
-                    status: 'ACTIVE',
+                    zonePrefix: "SO16",
+                    status: "ACTIVE",
                 },
             });
         }
     }
 
-    console.log('✅ Service slots seeded');
+    console.log("✅ Service slots seeded");
 
-    console.log('🎉 Database seeded successfully');
+    console.log("🎉 Database seeded successfully");
 }
 
 main()

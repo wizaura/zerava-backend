@@ -5,6 +5,8 @@ export class CreateBookingDto {
     timeFrom: string;
     timeTo: string;
 
+    userId: string;
+
     serviceType: ServiceType;
     vehicleSize: VehicleSize;
     price: number;

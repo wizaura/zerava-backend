@@ -3,6 +3,9 @@ import {
     Controller,
     Get,
     Post,
+    Patch,
+    Delete,
+    Param,
     UseGuards,
 } from '@nestjs/common';
 import { OperatorService } from './operator.service';
@@ -26,9 +29,26 @@ export class OperatorController {
     @UseGuards(AdminJwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Post('admin/operators')
-    create(
+    create(@Body() body: { name: string }) {
+        return this.service.create(body.name);
+    }
+
+    // ✅ UPDATE
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @Patch('admin/operators/:id')
+    update(
+        @Param('id') id: string,
         @Body() body: { name: string },
     ) {
-        return this.service.create(body.name);
+        return this.service.update(id, body.name);
+    }
+
+    // ✅ DELETE (soft delete)
+    @UseGuards(AdminJwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @Delete('admin/operators/:id')
+    delete(@Param('id') id: string) {
+        return this.service.delete(id);
     }
 }

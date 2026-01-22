@@ -29,6 +29,8 @@ model User {
   postcode        String?
   vehicleSize     String?   // small / medium / large
 
+  bookings        Booking[]
+
   createdAt       DateTime @default(now())
 }
 
@@ -52,6 +54,9 @@ model Otp {
 model Booking {
   id String @id @default(uuid())
   referenceCode String? @unique
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
 
   serviceSlotId String
   serviceSlot   ServiceSlot @relation(fields: [serviceSlotId], references: [id])
@@ -78,6 +83,7 @@ model Booking {
 
   @@unique([serviceSlotId, timeFrom, timeTo])
   @@index([serviceSlotId])
+  @@index([userId])
 }
 
 model ServiceZone {
