@@ -66,7 +66,7 @@ export class PaymentsService {
             to: booking.email,
             name: booking.name,
             reference: booking.referenceCode as string,
-            amount: booking.price,
+            amount: booking.price / 100,
         });
     }
 }

@@ -84,7 +84,7 @@ export class BookingRepository {
     /* ---------- USER BOOKINGS ---------- */
 
     async findByUser(userId: string) {
-        return this.prisma.booking.findMany({
+        const bookings = await this.prisma.booking.findMany({
             where: { userId },
             orderBy: { createdAt: "desc" },
             select: {
@@ -108,6 +108,11 @@ export class BookingRepository {
                 },
             },
         });
+
+        return bookings.map((b) => ({
+            ...b,
+            price: b.price / 100,
+        }));
     }
 
     /* ---------- ADMIN BOOKINGS ---------- */
@@ -116,7 +121,7 @@ export class BookingRepository {
         search?: string;
         status?: BookingStatus;
     }) {
-        return this.prisma.booking.findMany({
+        const bookings = await this.prisma.booking.findMany({
             where: {
                 ...(filters.status && {
                     status: filters.status,
@@ -168,5 +173,10 @@ export class BookingRepository {
                 },
             },
         });
+
+        return bookings.map((b) => ({
+            ...b,
+            price: b.price / 100,
+        }));
     }
 }

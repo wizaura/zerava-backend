@@ -21,7 +21,7 @@ export class BookingService {
             date: booking.createdAt.toDateString(),
             timeFrom: booking.timeFrom,
             timeTo: booking.timeTo,
-            price: booking.price,
+            price: booking.price / 100,
         });
 
         return booking;

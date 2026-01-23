@@ -16,7 +16,7 @@ export function bookingConfirmationTemplate(data: {
       <li><b>Reference:</b> ${data.reference}</li>
       <li><b>Date:</b> ${data.date}</li>
       <li><b>Time:</b> ${data.timeFrom} – ${data.timeTo}</li>
-      <li><b>Amount:</b> £${data.price}</li>
+      <li><b>Amount:</b> £${data.price.toFixed(2)}</li>
     </ul>
 
     <p>We'll see you soon!</p>
@@ -55,7 +55,7 @@ export function paymentSuccessTemplate(data: {
 
     <ul>
       <li><b>Booking Ref:</b> ${data.reference}</li>
-      <li><b>Amount Paid:</b> £${data.amount}</li>
+      <li><b>Amount Paid:</b> £${data.amount.toFixed(2)}</li>
     </ul>
 
     <p>Thank you for choosing Zerava Mobility.</p>
