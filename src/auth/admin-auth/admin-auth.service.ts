@@ -65,12 +65,8 @@ export class AdminAuthService {
 
         let admin = await this.prisma.admin.findUnique({ where: { email } });
 
-        // if(!admin){
-        //     throw new UnauthorizedException("Not found");
-        // }
-
-        if (!admin) {
-            admin = await this.prisma.admin.create({ data: { email } });
+        if(!admin){
+            throw new UnauthorizedException("Not found");
         }
 
         const accessToken = this.generateAccessToken(admin.id);

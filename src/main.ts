@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import * as bodyParser from "body-parser";
+import { runRuntimeSeed } from './seed/runtime.seed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  await runRuntimeSeed();
 
   app.use(
     "/payments/webhook",
