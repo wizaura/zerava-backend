@@ -11,7 +11,6 @@ import { ServicesModule } from './services/services.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
-import { MailModule } from './mail/mail.module';
 import { ServicePricingModule } from './service-pricing/service-pricing.module';
 import { ServiceZonesModule } from './service-zones/service-zones.module';
 import { ServiceSlotsModule } from './service-slots/service-slots.module';
@@ -32,7 +31,6 @@ import { AdminAuthModule } from './auth/admin-auth/admin-auth.module';
     AdminModule,
     AdminAuthModule,
     PaymentsModule,
-    MailModule,
 
     ServicePricingModule,
     ServiceZonesModule,

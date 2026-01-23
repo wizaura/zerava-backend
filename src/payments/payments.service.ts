@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { MailService } from "src/common/services/mail/mail.service";
 
 @Injectable()
 export class PaymentsService {
@@ -8,9 +9,12 @@ export class PaymentsService {
         apiVersion: "2025-12-15.clover",
     });
 
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private mail: MailService
+    ) { }
 
-    async createCheckoutSession(bookingId: string) {    
+    async createCheckoutSession(bookingId: string) {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
         });
@@ -37,16 +41,32 @@ export class PaymentsService {
     }
 
     async handleWebhook(event: Stripe.Event) {
-        if (event.type === "checkout.session.completed") {
-            const session = event.data.object as Stripe.Checkout.Session;
-            const bookingId = session.metadata?.bookingId;
+        if (event.type !== "checkout.session.completed") return;
 
-            if (bookingId) {
-                await this.prisma.booking.update({
-                    where: { id: bookingId },
-                    data: { status: "CONFIRMED" },
-                });
-            }
-        }
+        const session = event.data.object as Stripe.Checkout.Session;
+        const bookingId = session.metadata?.bookingId;
+
+        if (!bookingId) return;
+
+        // Idempotency check (VERY IMPORTANT)
+        const booking = await this.prisma.booking.findUnique({
+            where: { id: bookingId },
+        });
+
+        if (!booking || booking.status === "CONFIRMED") return;
+
+        // Update booking
+        await this.prisma.booking.update({
+            where: { id: bookingId },
+            data: { status: "CONFIRMED" },
+        });
+
+        // SEND PAYMENT SUCCESS EMAIL
+        await this.mail.sendPaymentSuccess({
+            to: booking.email,
+            name: booking.name,
+            reference: booking.referenceCode as string,
+            amount: booking.price,
+        });
     }
 }

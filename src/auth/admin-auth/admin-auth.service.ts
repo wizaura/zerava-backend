@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { mailer } from "src/common/services/mail.service";
+import { MailService } from "src/common/services/mail/mail.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import bcrypt from "bcryptjs";
 
@@ -10,6 +10,7 @@ export class AdminAuthService {
     constructor(
         private prisma: PrismaService,
         private jwt: JwtService,
+        private mail: MailService,
     ) { }
 
     private generateAccessToken(id: string) {
@@ -41,11 +42,8 @@ export class AdminAuthService {
             },
         });
 
-        await mailer.sendMail({
-            to: email,
-            subject: "Admin Login OTP",
-            html: `<b>${otp}</b> (Valid 5 minutes)`,
-        });
+        await this.mail.sendOtpEmail(email, otp, "ADMIN_LOGIN");
+        
 
         return { message: "OTP sent" };
     }
@@ -77,6 +75,8 @@ export class AdminAuthService {
 
         const accessToken = this.generateAccessToken(admin.id);
         const refreshToken = this.generateRefreshToken(admin.id);
+
+        await this.prisma.otp.deleteMany({ where: { email } });
 
         return { accessToken, refreshToken, admin: { id: admin.id, email: admin.email } };
     }
