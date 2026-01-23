@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import * as bodyParser from "body-parser";
+import * as express from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,9 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Client'],
   });
   app.use(cookieParser());
+
+  app.use("/uploads", express.static("uploads"));
+
 
   await app.listen(process.env.PORT ?? 4000);
 }

@@ -161,6 +161,8 @@ export class BookingRepository {
                 referenceCode: true,
                 name: true,
                 email: true,
+                timeFrom: true,
+                timeTo: true,
                 serviceType: true,
                 price: true,
                 status: true,
@@ -169,6 +171,11 @@ export class BookingRepository {
                 serviceSlot: {
                     select: {
                         date: true,
+                        operator: {
+                            select: {
+                                name: true,
+                            }
+                        },
                     },
                 },
             },

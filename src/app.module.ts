@@ -17,6 +17,7 @@ import { ServiceSlotsModule } from './service-slots/service-slots.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { OperatorModule } from './operator/operator.module';
 import { AdminAuthModule } from './auth/admin-auth/admin-auth.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AdminAuthModule } from './auth/admin-auth/admin-auth.module';
     AdminModule,
     AdminAuthModule,
     PaymentsModule,
+    GalleryModule,
 
     ServicePricingModule,
     ServiceZonesModule,

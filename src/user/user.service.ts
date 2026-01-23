@@ -33,4 +33,17 @@ export class UserService {
             },
         });
     }
+
+     /* ---------- ADMIN ---------- */
+    getAllForAdmin() {
+        return this.prisma.user.findMany({
+            orderBy: { createdAt: "desc" },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                createdAt: true,
+            },
+        });
+    }
 }
