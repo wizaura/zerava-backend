@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import * as nodemailer from "nodemailer";
+import { Resend } from "resend";
 import {
     bookingConfirmationTemplate,
     otpTemplate,
@@ -8,21 +8,14 @@ import {
 
 @Injectable()
 export class MailService {
-    private transporter;
+    private resend: Resend;
     private logger = new Logger(MailService.name);
 
     constructor() {
-        this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: false,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        });
+        this.resend = new Resend(process.env.RESEND_API_KEY);
     }
 
+    /* ---------- BOOKING CONFIRMATION ---------- */
     async sendBookingConfirmation(data: {
         to: string;
         name: string;
@@ -39,14 +32,15 @@ export class MailService {
         });
     }
 
+    /* ---------- OTP ---------- */
     async sendOtpEmail(
         to: string,
         otp: string,
         purpose: "LOGIN" | "ADMIN_LOGIN" = "LOGIN",
     ) {
         try {
-            await this.transporter.sendMail({
-                from: `"Zerava" <${process.env.SMTP_FROM}>`,
+            await this.resend.emails.send({
+                from: process.env.MAIL_FROM!,
                 to,
                 subject:
                     purpose === "ADMIN_LOGIN"
@@ -56,10 +50,11 @@ export class MailService {
             });
         } catch (err) {
             this.logger.error("OTP email failed", err);
-            // ❗ Never throw
+            // ❗ Never throw — auth flow must continue
         }
     }
 
+    /* ---------- PAYMENT SUCCESS ---------- */
     async sendPaymentSuccess(data: {
         to: string;
         name: string;
@@ -73,14 +68,15 @@ export class MailService {
         });
     }
 
+    /* ---------- CORE SEND ---------- */
     private async sendMail(payload: {
         to: string;
         subject: string;
         html: string;
     }) {
         try {
-            await this.transporter.sendMail({
-                from: `"Zerava Mobility" <${process.env.SMTP_FROM}>`,
+            await this.resend.emails.send({
+                from: process.env.MAIL_FROM!,
                 ...payload,
             });
         } catch (err) {
