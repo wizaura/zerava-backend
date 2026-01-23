@@ -60,4 +60,22 @@ export class AuthController {
         return { user };
     }
 
+    @Post("logout")
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+        });
+
+        return { success: true };
+    }
+
+
 }
