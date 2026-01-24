@@ -7,20 +7,29 @@ import * as express from "express";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const server = app.getHttpAdapter().getInstance();
-  server.set("trust proxy", 1);
-
   app.use(
     "/payments/webhook",
     bodyParser.raw({ type: "application/json" })
   );
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://zerava-frontend.vercel.app'],
+    origin: (origin, callback) => {
+      const allowed = [
+        "http://localhost:3000",
+        "https://zerava-frontend.vercel.app",
+      ];
+
+      if (!origin) return callback(null, true);
+
+      if (allowed.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"), false);
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Client'],
   });
+
   app.use(cookieParser());
 
   app.use("/uploads", express.static("uploads"));

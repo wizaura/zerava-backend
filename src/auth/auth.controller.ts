@@ -1,86 +1,82 @@
-import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "./jwt/jwt.guard";
-import type { Response } from "express";
+import {
+    Body,
+    Controller,
+    Post,
+    Req,
+    Res,
+    UnauthorizedException,
+} from "@nestjs/common";
+import type { Response, Request, CookieOptions } from "express";
 import { AuthService } from "./auth.service";
 import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { RequestOtpDto } from "./dto/request-otp.dto";
 
-const COOKIE_OPTIONS = {
+const isProd = process.env.NODE_ENV === "production";
+
+const COOKIE_OPTIONS: CookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "none" as const,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax" as const,
     path: "/",
-    domain: ".onrender.com",
+    ...(isProd && { domain: ".onrender.com" }),
 };
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
     constructor(private readonly auth: AuthService) { }
 
-    @Post('request-otp')
+    @Post("request-otp")
     requestOtp(@Body() dto: RequestOtpDto) {
         return this.auth.requestOtp(dto.email);
     }
 
+    @Post("verify-otp")
+    async verifyOtp(
+        @Body() dto: VerifyOtpDto,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const { accessToken, refreshToken, user } =
+            await this.auth.verifyOtp(dto.email, dto.otp);
 
-    @Post('verify-otp')
-    async verifyOtp(@Body() dto: VerifyOtpDto, @Res({ passthrough: true }) res: Response) {
-        const result = await this.auth.verifyOtp(dto.email, dto.otp);
+        res.cookie("accessToken", accessToken, {
+            ...COOKIE_OPTIONS,
+            maxAge: 15 * 60 * 1000,
+        });
 
-        res.cookie('refreshToken', result.refreshToken, {
+        res.cookie("refreshToken", refreshToken, {
             ...COOKIE_OPTIONS,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.cookie('accessToken', result.accessToken, {
+        return { user };
+    }
+
+    @Post("refresh")
+    async refresh(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) {
+            throw new UnauthorizedException();
+        }
+
+        const { accessToken } =
+            await this.auth.refreshAccessToken(refreshToken);
+
+        res.cookie("accessToken", accessToken, {
             ...COOKIE_OPTIONS,
             maxAge: 15 * 60 * 1000,
-        });
-
-        return { user: result.user };
-    }
-
-    @Post('refresh')
-    async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
-        const token = req.cookies?.refreshToken;
-        if (!token) throw new UnauthorizedException();
-
-        const result = await this.auth.refreshAccessToken(token);
-
-        res.cookie('accessToken', result.accessToken, {
-            ...COOKIE_OPTIONS,
-            maxAge: 15 * 60 * 1000,
-        });
-
-        return result;
-    }
-
-    @Get('me')
-    @UseGuards(JwtAuthGuard)
-    me(@Req() req) {
-        return {
-            user: {
-                id: req.user.id,
-            },
-        };
-    }
-
-    @Post("logout")
-    logout(@Res({ passthrough: true }) res: Response) {
-        res.clearCookie("accessToken", {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
-        });
-
-        res.clearCookie("refreshToken", {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
         });
 
         return { success: true };
     }
 
+    @Post("logout")
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie("accessToken", COOKIE_OPTIONS);
+        res.clearCookie("refreshToken", COOKIE_OPTIONS);
 
+        return { success: true };
+    }
 }
