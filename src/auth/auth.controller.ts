@@ -23,6 +23,7 @@ export class AuthController {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -30,6 +31,7 @@ export class AuthController {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
+            path: '/',
             maxAge: 15 * 60 * 1000,
         });
 
@@ -47,6 +49,7 @@ export class AuthController {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
+            path: '/',
             maxAge: 15 * 60 * 1000,
         });
 
@@ -55,9 +58,12 @@ export class AuthController {
 
     @Get('me')
     @UseGuards(JwtAuthGuard)
-    async me(@Req() req) {
-        const user = await this.auth.getUserById(req.user.id);
-        return { user };
+    me(@Req() req) {
+        return {
+            user: {
+                id: req.user.id,
+            },
+        };
     }
 
     @Post("logout")
