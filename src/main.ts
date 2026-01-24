@@ -7,6 +7,8 @@ import * as express from "express";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const server = app.getHttpAdapter().getInstance();
+  server.set("trust proxy", 1);
 
   app.use(
     "/payments/webhook",
@@ -14,7 +16,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['http://localhost:3000','https://zerava-frontend.vercel.app'],
+    origin: ['http://localhost:3000', 'https://zerava-frontend.vercel.app'],
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Client'],

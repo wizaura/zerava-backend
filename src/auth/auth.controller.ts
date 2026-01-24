@@ -5,6 +5,14 @@ import { AuthService } from "./auth.service";
 import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { RequestOtpDto } from "./dto/request-otp.dto";
 
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+    path: "/",
+    domain: ".onrender.com",
+};
+
 @Controller('auth')
 export class AuthController {
     constructor(private readonly auth: AuthService) { }
@@ -20,18 +28,12 @@ export class AuthController {
         const result = await this.auth.verifyOtp(dto.email, dto.otp);
 
         res.cookie('refreshToken', result.refreshToken, {
-            httpOnly: true,
-            sameSite: 'none',
-            secure: true,
-            path: '/',
+            ...COOKIE_OPTIONS,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         res.cookie('accessToken', result.accessToken, {
-            httpOnly: true,
-            sameSite: 'none',
-            secure: true,
-            path: '/',
+            ...COOKIE_OPTIONS,
             maxAge: 15 * 60 * 1000,
         });
 
@@ -46,10 +48,7 @@ export class AuthController {
         const result = await this.auth.refreshAccessToken(token);
 
         res.cookie('accessToken', result.accessToken, {
-            httpOnly: true,
-            sameSite: 'none',
-            secure: true,
-            path: '/',
+            ...COOKIE_OPTIONS,
             maxAge: 15 * 60 * 1000,
         });
 
